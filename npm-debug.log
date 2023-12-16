@@ -1,0 +1,48 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'node', '/usr/local/bin/npm', 'install', 'firebase' ]
+2 info using npm@1.1.65
+3 info using node@v0.8.14
+4 verbose read json /Users/carolinaimvinkelried/Desktop/juego de fuchibokl/package.json
+5 verbose read json /Users/carolinaimvinkelried/Desktop/juego de fuchibokl/package.json
+6 verbose cache add [ 'firebase', null ]
+7 silly cache add name=undefined spec="firebase" args=["firebase",null]
+8 verbose parsed url { pathname: 'firebase', path: 'firebase', href: 'firebase' }
+9 silly lockFile 92f5e8df-firebase firebase
+10 verbose lock firebase /Users/carolinaimvinkelried/.npm/92f5e8df-firebase.lock
+11 silly lockFile 92f5e8df-firebase firebase
+12 verbose addNamed [ 'firebase', '' ]
+13 verbose addNamed [ null, '' ]
+14 silly lockFile 2bddc103-firebase firebase@
+15 verbose lock firebase@ /Users/carolinaimvinkelried/.npm/2bddc103-firebase.lock
+16 silly addNameRange { name: 'firebase', range: '', hasData: false }
+17 verbose url raw firebase
+18 verbose url resolving [ 'https://registry.npmjs.org/', './firebase' ]
+19 verbose url resolved https://registry.npmjs.org/firebase
+20 info trying registry request attempt 1 at 13:02:10
+21 http GET https://registry.npmjs.org/firebase
+22 info retry will retry, error on last attempt: Error: 140736269771648:error:1407742E:SSL routines:SSL23_GET_SERVER_HELLO:tlsv1 alert protocol version:../deps/openssl/openssl/ssl/s23_clnt.c:658:
+23 info trying registry request attempt 2 at 13:02:20
+24 http GET https://registry.npmjs.org/firebase
+25 info retry will retry, error on last attempt: Error: 140736269771648:error:1407742E:SSL routines:SSL23_GET_SERVER_HELLO:tlsv1 alert protocol version:../deps/openssl/openssl/ssl/s23_clnt.c:658:
+26 info trying registry request attempt 3 at 13:03:20
+27 http GET https://registry.npmjs.org/firebase
+28 silly lockFile 2bddc103-firebase firebase@
+29 error Error: 140736269771648:error:1407742E:SSL routines:SSL23_GET_SERVER_HELLO:tlsv1 alert protocol version:../deps/openssl/openssl/ssl/s23_clnt.c:658:
+29 error
+29 error     at CleartextStream._puller (tls.js:649:24)
+29 error     at CleartextStream.CryptoStream._pull (tls.js:583:19)
+29 error     at SecurePair.cycle (tls.js:873:20)
+29 error     at EncryptedStream.CryptoStream.write (tls.js:267:13)
+29 error     at Socket.ondata (stream.js:38:26)
+29 error     at Socket.EventEmitter.emit (events.js:96:17)
+29 error     at TCP.onread (net.js:396:14)
+30 error If you need help, you may report this log at:
+30 error     <http://github.com/isaacs/npm/issues>
+30 error or email it to:
+30 error     <npm-@googlegroups.com>
+31 error System Darwin 17.7.0
+32 error command "node" "/usr/local/bin/npm" "install" "firebase"
+33 error cwd /Users/carolinaimvinkelried/Desktop/juego de fuchibokl
+34 error node -v v0.8.14
+35 error npm -v 1.1.65
+36 verbose exit [ 1, true ]

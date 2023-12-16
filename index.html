@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ronda Soccer</title>
+    <style>
+        body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f2f2f2;
+}
+
+h1, h2 {
+    color: #333;
+}
+
+#pantalla-inicio-sesion, #pantalla-inicio, #pantalla-juego, #pantalla-tienda, #pantalla-configuracion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: 20px;
+}
+
+#pantalla-inicio-sesion {
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    padding: 20px;
+}
+
+#email-input, #contrasena-input, button {
+    margin: 10px;
+    padding: 10px;
+}
+
+button {
+    cursor: pointer;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#pantalla-inicio, #pantalla-juego, #pantalla-tienda, #pantalla-configuracion {
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    padding: 20px;
+}
+
+canvas {
+    border: 2px solid #000;
+}
+
+#marcador {
+    font-size: 18px;
+    margin-top: 10px;
+}
+
+#cantidad-monedas {
+    font-weight: bold;
+    color: #ffcc00;
+}
+
+#pantalla-configuracion button {
+    margin: 10px;
+    padding: 10px;
+    background-color: #337ab7;
+    color: white;
+    border: none;
+    border-radius: 4px;
+}
+
+#pantalla-configuracion button:last-child {
+    background-color: #d9534f;
+}
+
+#pantalla-configuracion button:hover {
+    background-color: #286090;
+}
+
+
+        /* Estilos CSS ... */
+    </style>
+</head>
+<body>
+
+<div id="pantalla-inicio-sesion">
+    <h1>Bienvenido</h1>
+    <h2>Regístrate aquí con tu correo electrónico:</h2>
+    <input type="text" id="email-input">
+    <h2>Contraseña:</h2>
+    <input type="password" id="contrasena-input">
+    
+    <button onclick="iniciarSesion()">Iniciar Sesión</button>
+
+</div>
+<div id="pantalla-inicio" style="display: none;">
+    <h1>Bienvenido a Ronda Soccer</h1>
+    <button onclick="iniciarJuego()">Jugar</button>
+    <button onclick="mostrarPantalla('pantalla-tienda')">Tienda</button>
+    <button onclick="mostrarPantalla('pantalla-configuracion')">Configuración</button>
+</div>
+
+<div id="pantalla-juego" style="display: none;">
+    <canvas id="campo"></canvas>
+    <button onclick="terminarPartido('ganado')">Terminar Partido (Ganado)</button>
+    <button onclick="terminarPartido('perdido')">Terminar Partido (Perdido)</button>
+    <button onclick="mostrarPantalla('pantalla-inicio')">Volver al Inicio</button>
+    <div id="marcador">Marcador: <span id="equipoAzul">0</span> - <span id="equipoRojo">0</span></div>
+</div>
+
+<div id="pantalla-tienda" style="display: none;">
+    <h1>TIENDA</h1>
+    <p>Monedas: <span id="cantidad-monedas">0</span></p>
+    <button onclick="comprarItem('velocidad', 5)">Mejorar Velocidad (5 monedas)</button>
+    <button onclick="comprarItem('tiros', 10)">Tiros más Fuertes (10 monedas)</button>
+    <button onclick="comprarItem('arco', 15)">Arco más Pequeño (15 monedas)</button>
+    <button onclick="mostrarPantalla('pantalla-inicio')">Volver al Inicio</button>
+</div>
+
+<div id="pantalla-configuracion" style="display: none;">
+    <h1>CONFIGURACION</h1>
+    <button onclick="aumentarBrillo()">Mas Brillo</button>
+    <button onclick="disminuirBrillo()">Menos Brillo</button>
+    <button onclick="mostrarPantalla('pantalla-inicio')">Volver al Inicio</button>
+</div>
+
+
+<script>
+    
+    let monedas = 0;
+    let monedasGanadas = 0;
+    let equipoSaca; // Variable para almacenar qué equipo saca al azar
+    let marcadorAzul = 0;
+    let marcadorRojo = 0;
+    let jugadores = [
+        { x: 50, y: 0 },   // Jugador Rojo
+        { x: 0, y: 0 }   // Jugador Azul
+    ];
+    const velocidadJugador = 5;
+    let canvas; // Declarar la variable canvas
+
+    function iniciarJuego() {
+        mostrarPantalla('pantalla-juego');
+        const canvas = document.getElementById('campo');
+        const contexto = canvas.getContext('2d');
+
+        // Tamaño de la cancha igual al tamaño de la ventana
+        canvas.width = window.innerWidth * 0.8;
+        canvas.height = window.innerHeight * 0.8;
+
+        // Determinar qué equipo saca al azar
+        equipoSaca = Math.random() < 0.5 ? 'azul' : 'rojo';
+
+        // Dibuja la cancha
+        contexto.fillStyle = '#00A300'; // Color del césped
+        contexto.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Dibuja la línea por la mitad de la cancha
+        contexto.strokeStyle = '#FFF'; // Color de la línea
+        contexto.lineWidth = 2;
+        contexto.beginPath();
+        contexto.moveTo(canvas.width / 2, 0);
+        contexto.lineTo(canvas.width / 2, canvas.height);
+        contexto.stroke();
+
+        // Dibuja los arcos
+        dibujarArco(contexto, 'rojo', 50, canvas.height / 2);
+        dibujarArco(contexto, 'azul', canvas.width - 50, canvas.height / 2);
+
+        // Dibuja los jugadores
+        dibujarJugadores(contexto, 'red', [
+            { x: 50, y: canvas.height / 2 },
+            { x: 190, y: 190 },
+            { x: 150, y: canvas.height / 2 - 50 },
+            { x: 150, y: canvas.height / 2 + 50 },
+            { x: 190, y: 880 },
+            { x: 250, y: canvas.height / 2 - 50 },
+            { x: 250, y: canvas.height / 2 + 50 },
+            { x: 350, y: 50 },
+            { x: 350, y: canvas.height / 2 - 50 },
+            { x: 350, y: canvas.height / 2 + 50 },
+            { x: canvas.width / 2 - 50, y: canvas.height / 2 }
+        ]);
+
+        dibujarJugadores(contexto, 'blue', [
+            { x: canvas.width - 50, y: canvas.height / 2 },
+            { x: canvas.width - 150, y: 550 },
+            { x: canvas.width - 150, y: canvas.height / 2 - 50 },
+            { x: canvas.width - 150, y: canvas.height / 2 + 50 },
+            { x: canvas.width - 250, y: 50 },
+            { x: canvas.width - 250, y: canvas.height / 2 - 50 },
+            { x: canvas.width - 250, y: canvas.height / 2 + 50 },
+            { x: canvas.width - 350, y: 50 },
+            { x: canvas.width - 350, y: canvas.height / 2 - 50 },
+            { x: canvas.width - 350, y: canvas.height / 2 + 50 },
+            { x: canvas.width / 2 + 50, y: canvas.height / 2 }
+        ]);
+
+        // Dibuja la pelota
+        dibujarPelota(contexto, canvas.width / 2, canvas.height / 2, 10, '#FFFFFF');
+
+        // Registra eventos de teclado
+        window.addEventListener('keydown', manejarTeclado);
+
+    }
+
+    function manejarTeclado(evento) {
+        
+switch (evento.key) {
+    // Jugadores Rojos
+    case '1':
+        moverJugador(jugadores[0], -velocidadJugador, 0);
+        break;
+    case '3':
+        moverJugador(jugadores[0], velocidadJugador, 0);
+        break;
+    // Jugadores Azules
+    case '7':
+        moverJugador(jugadores[1], -velocidadJugador, 0);
+        break;
+    case '9':
+        moverJugador(jugadores[1], velocidadJugador, 0);
+        break;
+}
+}
+
+
+function moverJugador(jugador, deltaX, deltaY) {
+jugador.x += deltaX;
+jugador.y += deltaY;
+
+// Asegúrate de que el jugador no salga de los límites del campo
+jugador.x = Math.max(10, Math.min(canvas.width - 10, jugador.x));
+jugador.y = Math.max(10, Math.min(canvas.height - 10, jugador.y));
+
+// Vuelve a dibujar los jugadores después de moverlos
+const contexto = canvas.getContext('2d');
+contexto.clearRect(0, 0, canvas.width, canvas.height);
+dibujarArco(contexto, 'rojo', 50, canvas.height / 2);
+dibujarArco(contexto, 'azul', canvas.width - 50, canvas.height / 2);
+dibujarJugadores(contexto, 'red', [jugadores[0]]);
+dibujarJugadores(contexto, 'blue', [jugadores[1]]);
+dibujarPelota(contexto, canvas.width / 2, canvas.height / 2, 10, '#FFFFFF');
+}
+
+
+        // Agregar lógica para manejar eventos de teclado
+        console.log('Tecla presionada:', evento.key);
+        // Puedes agregar la lógica para mover jugadores, disparar, etc.
+    
+
+    function terminarPartido(resultado) {
+        if (resultado === 'ganado') {
+            monedasGanadas++;
+            monedas += 1;
+            mostrarPantalla('pantalla-inicio');
+            // Otorga monedas basadas en el número total de partidos ganados
+        }
+
+        // Actualiza el marcador
+        if (equipoSaca === 'azul') {
+            marcadorAzul++;
+        } else {
+            marcadorRojo++;
+        }
+
+        // Muestra el marcador
+        document.getElementById('equipoAzul').innerText = marcadorAzul;
+        document.getElementById('equipoRojo').innerText = marcadorRojo;
+
+        actualizarCantidadMonedas();
+        mostrarPantalla('pantalla-inicio'); // Vuelve a la pantalla inicial
+    }
+
+    function comprarItem(item, costo) {
+        if (monedas >= costo) {
+            monedas -= costo;
+            mostrarPantalla('pantalla-inicio');
+            // Aquí deberías agregar la lógica correspondiente para aplicar las mejoras
+            console.log(`Compra exitosa: ${item}`);
+        } else {
+            alert('No tienes suficientes monedas.');
+        }
+
+        actualizarCantidadMonedas();
+    }
+
+    function actualizarCantidadMonedas() {
+        // Actualiza la cantidad de monedas en la pantalla de la tienda
+        document.getElementById('cantidad-monedas').innerText = monedas;
+    }
+
+    function mostrarPantalla(pantalla) {
+        // Ocultar todas las pantallas
+        document.getElementById('pantalla-inicio-sesion').style.display = 'none';
+        document.getElementById('pantalla-inicio').style.display = 'none';
+        document.getElementById('pantalla-juego').style.display = 'none';
+        document.getElementById('pantalla-tienda').style.display = 'none';
+        document.getElementById('pantalla-configuracion').style.display = 'none';
+        
+        // Mostrar la pantalla especificada
+        document.getElementById(pantalla).style.display = 'flex';
+    }
+
+    function dibujarPelota(contexto, x, y, radio, color) {
+        contexto.fillStyle = color;
+        contexto.beginPath();
+        contexto.arc(x, y, radio, 0, 2 * Math.PI);
+        contexto.fill();
+    }
+
+    function dibujarArco(contexto, color, x, y) {
+        contexto.beginPath();
+        contexto.moveTo(x, y - 50);
+        contexto.lineTo(x, y + 50);
+        contexto.lineWidth = 2;
+        contexto.strokeStyle = color;
+        contexto.stroke();
+    }
+
+    function dibujarJugadores(contexto, color, posiciones) {
+        contexto.fillStyle = color;
+
+        posiciones.forEach((posicion, index) => {
+            contexto.beginPath();
+            contexto.arc(posicion.x, posicion.y, 10, 0, 2 * Math.PI);
+            contexto.fillText(index + 1, posicion.x - 3, posicion.y + 4); // Número de jugador
+            contexto.fill();
+            contexto.stroke();
+        });
+    }
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Agregar evento al botón de "Más Brillo"
+        const botonMasBrillo = document.querySelector('#pantalla-configuracion button');
+        botonMasBrillo.addEventListener('click', function () {
+            aumentarBrillo();
+        });
+
+        function aumentarBrillo() {
+            // Obtener el estilo actual del cuerpo
+            const estiloCuerpo = getComputedStyle(document.body);
+            // Obtener el valor actual del filtro (si existe)
+            const filtroActual = estiloCuerpo.filter || estiloCuerpo.webkitFilter || estiloCuerpo.mozFilter;
+
+            // Extraer el valor actual de brillo (si existe)
+            const matchBrillo = filtroActual.match(/brightness\((\d+(\.\d+)?)\)/);
+
+            // Calcular el nuevo valor de brillo
+            const nuevoBrillo = matchBrillo ? parseFloat(matchBrillo[1]) + 0.1 : 1.1;
+
+            // Aplicar el nuevo valor de brillo al cuerpo
+            document.body.style.filter = `brightness(${nuevoBrillo})`;
+        }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Agregar evento al botón de "Menos Brillo"
+        const botonMenosBrillo = document.querySelector('#pantalla-configuracion button:last-child');
+        botonMenosBrillo.addEventListener('click', function () {
+            disminuirBrillo();
+        });
+
+        function disminuirBrillo() {
+            // Obtener el estilo actual del cuerpo
+            const estiloCuerpo = getComputedStyle(document.body);
+            // Obtener el valor actual del filtro (si existe)
+            const filtroActual = estiloCuerpo.filter || estiloCuerpo.webkitFilter || estiloCuerpo.mozFilter;
+
+            // Extraer el valor actual de brillo (si existe)
+            const matchBrillo = filtroActual.match(/brightness\((\d+(\.\d+)?)\)/);
+
+            // Calcular el nuevo valor de brillo
+            const nuevoBrillo = matchBrillo ? Math.max(parseFloat(matchBrillo[1]) - 0.1, 0.1) : 0.9;
+
+            // Aplicar el nuevo valor de brillo al cuerpo
+            document.body.style.filter = `brightness(${nuevoBrillo})`;
+        }
+    });
+</script>
+
+</body>
+</html>
+
+<!-- Otras pantallas ... -->
+
+<!-- Agrega la librería de Firebase Auth después de firebase-app.js -->
+<!-- Agrega la librería de Firebase Auth después de firebase-app.js -->
+<script src="https://www.gstatic.com/firebasejs/9.5.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.5.0/firebase-auth.js"></script>
+
+
+<script>
+    const firebaseConfig = {
+        // Tu configuración de Firebase aquí
+        apiKey: "AIzaSyBFWyEvOtSuLS82uDp-dLJWeO_CJAz9Bu4",
+        authDomain: "ronda-soccer-a6d87.firebaseapp.com",
+        projectId: "ronda-soccer-a6d87",
+        storageBucket: "ronda-soccer-a6d87.appspot.com",
+        messagingSenderId: "238383482432",
+        appId: "1:238383482432:web:0d3713ecee5b3f978f81a5"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    function iniciarSesion() {
+    const email = document.getElementById('email-input').value;
+    const contrasena = document.getElementById('contrasena-input').value; // Corregido aquí
+
+    auth.signInWithEmailAndPassword(email, contrasena) // Corregido aquí
+        .then((userCredential) => {
+            // Inicio de sesión exitoso
+            const user = userCredential.user;
+            console.log('Inicio de sesión exitoso:', user);
+            document.getElementById('pantalla-inicio').style.display = 'none';
+            // Aquí puedes redirigir a la pantalla principal o realizar otras acciones
+        })
+        .catch((error) => {
+            // Hubo un error en el inicio de sesión
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log('Error en el inicio de sesión:', errorCode, errorMessage);
+            // Aquí puedes mostrar un mensaje de error al usuario
+        });
+}
+
+    
+</script>
+
+<!-- Otros scripts ... -->
+
+</body>
+</html>
